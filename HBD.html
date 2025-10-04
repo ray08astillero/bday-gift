@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Happy Birthday, Angelu! 🎉</title>
+  <style>
+    :root{
+      --bg1:#0ea5e9; --bg2:#a78bfa; --card:#ffffffee;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0; font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif; color:#0f172a}
+    body{
+      background: radial-gradient(1200px 600px at 20% 10%, #ffffff44, transparent 60%),
+                  linear-gradient(135deg,var(--bg1),var(--bg2));
+      overflow-x:hidden;
+    }
+    .balloons{position:fixed; inset:0; pointer-events:none; overflow:hidden}
+    .balloon{position:absolute; bottom:-120px; width:90px; height:120px; background:var(--card); border-radius:50% 50% 45% 45%;
+      box-shadow:0 20px 40px #00000022; animation: rise var(--dur) linear infinite; opacity:.85}
+    .balloon::after{content:""; position:absolute; bottom:-16px; left:50%; transform:translateX(-50%); width:2px; height:22px; background:#33415555}
+    @keyframes rise{ to{ transform: translateY(-120vh) rotate(3deg) } }
+    header{ text-align:center; padding:80px 16px 32px }
+    .chip{ display:inline-block; background:#ffffffaa; padding:6px 12px; border-radius:999px; font-weight:600 }
+    h1{ font-size:clamp(32px,6vw,60px); margin:16px 0 8px }
+    .subtitle{ font-size:clamp(16px,3.2vw,22px); opacity:.9 }
+    .card{ max-width:920px; margin:24px auto; background:var(--card); border-radius:24px; padding:24px; box-shadow:0 20px 60px #0b122022 }
+    .hero{ display:grid; gap:20px; grid-template-columns:1fr; align-items:center }
+    .photo{ width:100%; border-radius:20px; aspect-ratio:16/9; object-fit:cover; background:#e2e8f0 }
+    .controls{ display:flex; flex-wrap:wrap; gap:12px; margin-top:10px }
+    button, .btn{
+      cursor:pointer; border:none; border-radius:14px; padding:12px 18px; font-weight:700;
+      background:linear-gradient(90deg,#22c55e,#84cc16); color:white; box-shadow:0 8px 24px #14532d44;
+    }
+    .ghost{ background:#0ea5e922; color:#0b1220; box-shadow:none }
+    .type{ font-size:clamp(16px,2.8vw,20px); line-height:1.6 }
+    .type .caret{ display:inline-block; width:1ch; background:#0b1220; animation:blink .9s steps(1,end) infinite }
+    @keyframes blink{ 50%{ background:transparent } }
+    .row{ display:grid; gap:20px; grid-template-columns:1fr; margin-top:24px }
+    footer{ text-align:center; color:#fff; opacity:.9; padding:36px 12px 80px; font-size:14px }
+    @media(min-width:860px){ .hero{ grid-template-columns:1.2fr .8fr } }
+    #confetti{ position:fixed; inset:0; pointer-events:none }
+    .share{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; padding:12px 14px; border-radius:12px; background:#f1f5f9; }
+    .input{ flex:1; min-width:200px; padding:10px 12px; border-radius:10px; border:1px solid #cbd5e1; font-size:14px }
+
+    /* 🎥 Popup video modal */
+    #videoModal {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8);
+      justify-content:center; align-items:center; z-index:9999;
+    }
+    #videoModal video { max-width:90%; max-height:80%; border-radius:12px; }
+    #closeVideo {
+      position:absolute; top:20px; right:20px;
+      background:#ef4444; color:white; border:none; border-radius:8px;
+      padding:8px 12px; font-weight:bold; cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="balloons"></div>
+  <canvas id="confetti"></canvas>
+
+  <header>
+    <!-- 🎁 Surprise Intro Screen -->
+<div id="surpriseScreen" style="
+position:fixed; inset:0; background:linear-gradient(135deg,#38bdf8,#a78bfa);
+color:white; display:flex; flex-direction:column; justify-content:center; align-items:center;
+z-index:99999; text-align:center; transition:opacity 0.8s ease;
+">
+<h1 style="font-size:2.5rem; margin-bottom:10px;">🎁 A Special Surprise Awaits!</h1>
+<p style="opacity:0.9;">Click anywhere to reveal your gift 🎂</p>
+</div>
+
+    <span class="chip">🎂 Birthday Surprise</span>
+    <h1>Happy Birthday, <span id="friendName">Angelu</span>! 🎉</h1>
+    <p class="subtitle">Wishing you a day filled with love, laughter, and sweet memories.</p>
+  </header>
+
+  <main class="card">
+    <section class="hero">
+      <div>
+        <img class="photo" id="photo" src="Cover.png" alt="Birthday cover image" />
+        <div class="controls">
+          <button id="confettiBtn">🎊 Celebrate</button>
+          <button id="videoBtn">▶️ Play Video Message</button>
+          <button id="messageBtn" class="ghost">💌 Message</button>
+        </div>
+      </div>
+      <div>
+        <p id="message" class="type">
+          Dear <strong><span id="friendNameInline">Angelu</span></strong>,  
+          Hope your day’s filled with good vibes, laughter, and all the things you love.
+          You deserve all the happiness in the world!
+          Thanks for being such an amazing friend — can’t imagine life without our random talks and crazy moments. 😂💖
+          Enjoy your day, you deserve it! 🎂✨ <span class="caret"></span>
+        </p>  
+        <!-- 💌 Message Popup -->
+        <div id="messageModal" style="
+        display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+        justify-content:center; align-items:center; z-index:9999;
+        ">
+        <div style="
+        position:relative; background:#fff; border-radius:20px; 
+        padding:20px; max-width:600px; width:90%; 
+        box-shadow:0 10px 40px rgba(0,0,0,0.5);
+         display:flex; flex-direction:column; align-items:center;
+          ">
+        <img id="messageImg" src="message.png" alt="Birthday Message" 
+         style="max-width:100%; border-radius:12px; margin-bottom:12px;" />
+         <button id="closeMessage" style="
+        background:#ef4444; color:white; border:none; border-radius:8px;
+        padding:8px 16px; font-weight:bold; cursor:pointer;
+         ">✖ Close</button>
+        </div>
+</div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer>Made by Raymond ang pinaka cute mong bestie!</footer>
+
+  <script>
+    // 🎁 Surprise Screen Logic
+    const surpriseScreen = document.getElementById('surpriseScreen');
+    surpriseScreen.addEventListener('click', () => {
+      surpriseScreen.style.opacity = '0';
+      setTimeout(() => {
+        surpriseScreen.style.display = 'none'; // hide completely after fade out
+      }, 800);
+    });
+  </script>
+  
+
+<!-- 🎥 Popup Video Modal -->
+<div id="videoModal" style="
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+  justify-content:center; align-items:center; z-index:9999;
+">
+  <div style="
+    position:relative; background:#000; border-radius:20px; 
+    padding:10px; max-width:800px; width:90%; 
+    box-shadow:0 10px 40px rgba(0,0,0,0.5);
+    display:flex; flex-direction:column; align-items:center;
+  ">
+    <video id="videoMsg" controls style="width:100%; border-radius:12px;">
+      <source src="birthday.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <button id="closeVideo" style="
+      margin-top:12px;
+      background:#ef4444; color:white; border:none; border-radius:8px;
+      padding:8px 16px; font-weight:bold; cursor:pointer;
+    ">✖ Close</button>
+  </div>
+</div>
+
+<script>
+  // 🎥 Popup video logic
+  const videoModal = document.getElementById('videoModal');
+  const videoEl = document.getElementById('videoMsg');
+  const closeVideo = document.getElementById('closeVideo');
+  const videoBtn = document.getElementById('videoBtn'); // make sure you have a button with this ID
+
+  // open and play
+  videoBtn.addEventListener('click', () => {
+    videoModal.style.display = "flex";
+    videoEl.play();
+  });
+
+  // close button
+  closeVideo.addEventListener('click', () => {
+    videoEl.pause();
+    videoEl.currentTime = 0; // reset to beginning (optional)
+    videoModal.style.display = "none";
+  });
+
+  // close when clicking outside the video card
+  videoModal.addEventListener('click', (e) => {
+    if (e.target === videoModal) {
+      videoEl.pause();
+      videoEl.currentTime = 0;
+      videoModal.style.display = "none";
+    }
+  });
+</script>
+<script>
+// ===== 💌 Message Popup =====
+const messageBtn = document.getElementById('messageBtn');
+const messageModal = document.getElementById('messageModal');
+const closeMessage = document.getElementById('closeMessage');
+
+messageBtn.addEventListener('click', () => {
+  messageModal.style.display = "flex"; // show popup
+});
+closeMessage.addEventListener('click', () => {
+  messageModal.style.display = "none"; // close popup
+});
+messageModal.addEventListener('click', (e) => {
+  if (e.target === messageModal) {
+    messageModal.style.display = "none"; // close when clicking outside
+  }
+});
+    </script>
+<script>// Balloons
+  const colors = ['#fecaca','#fde68a','#bbf7d0','#bae6fd','#ddd6fe'];
+  const balloons = document.querySelector('.balloons');
+  for (let i=0;i<14;i++){
+    const b = document.createElement('div');
+    b.className='balloon';
+    b.style.left = Math.random()*100 + 'vw';
+    b.style.background = colors[i%colors.length];
+    b.style.setProperty('--dur', (15 + Math.random()*12) + 's');
+    balloons.appendChild(b);
+  }
+</script>
+  <script>
+  // ===== Confetti =====
+  const canvas = document.getElementById('confetti');
+  const ctx = canvas.getContext('2d');
+  let W, H, confetti = [], raf;
+  const color = ['#fecaca','#fde68a','#bbf7d0','#bae6fd','#ddd6fe'];
+
+  const reset = ()=>{ 
+    W = canvas.width = innerWidth; 
+    H = canvas.height = innerHeight; 
+  };
+  addEventListener('resize', reset); reset();
+
+  function burst(x=W/2, y=H/2, n=140){
+    for(let i=0;i<n;i++){
+      confetti.push({
+        x, y,
+        vx:(Math.random()*6-3),
+        vy:(Math.random()*-6-2),
+        g:0.06 + Math.random()*0.12,
+        s: 4 + Math.random()*6,
+        a: 1,
+        r: Math.random()*Math.PI,
+        c: colors[(i+Math.floor(Math.random()*colors.length))%colors.length]
+      });
+    }
+    if (!raf) loop();
+  }
+
+  function loop(){
+    raf = requestAnimationFrame(loop);
+    ctx.clearRect(0,0,W,H);
+    for(let i=confetti.length-1;i>=0;i--){
+      const p = confetti[i];
+      p.vy += p.g; 
+      p.x += p.vx; 
+      p.y += p.vy; 
+      p.r += 0.05; 
+      p.a -= 0.006;
+      ctx.globalAlpha = Math.max(p.a,0);
+      ctx.save(); 
+      ctx.translate(p.x,p.y); 
+      ctx.rotate(p.r);
+      ctx.fillStyle = p.c; 
+      ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s);
+      ctx.restore();
+      if (p.y>H+40 || p.a<=0) confetti.splice(i,1);
+    }
+    if (confetti.length===0){ cancelAnimationFrame(raf); raf=null; }
+  }
+
+  // 🎊 Confetti Button Logic
+  const confettiBtn = document.getElementById('confettiBtn');
+  confettiBtn.addEventListener('click', (e)=>{
+    const rect = confettiBtn.getBoundingClientRect();
+    const x = rect.left + rect.width/2;
+    const y = rect.top + rect.height/2 + window.scrollY;
+    burst(x, y);       // burst at button
+    setTimeout(()=>burst(), 300); // extra burst at center
+  });
+
+  // initial burst when page loads
+  setTimeout(()=>burst(), 600);
+  </script>
+</body>
+</html>
